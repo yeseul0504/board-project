@@ -22,7 +22,7 @@ class ArticleControllerTest {
         this.mvc = mvc;
     }
 
-    @Disabled("구현 중")
+
     @DisplayName("[view][GET] - 게시글 리스트 (게시판)페이지 - 정상 호출")
     @Test
     public void givenNothing_whenRequestArticlesView_thenReturnArticlesView () throws Exception {
@@ -30,8 +30,8 @@ class ArticleControllerTest {
 
         //when
         mvc.perform(get("/articles"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(view().name("articles/index"))
                 .andExpect(model().attributeExists("articles"));
     }
@@ -44,7 +44,7 @@ class ArticleControllerTest {
 
         //when
         mvc.perform(get("/articles/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.TEXT_HTML))
                 .andExpect(view().name("articles/detail"))
                 .andExpect(model().attributeExists("article"))
@@ -58,7 +58,7 @@ class ArticleControllerTest {
 
         //when
         mvc.perform(get("/articles/search"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(view().name("articles/search"))
                 .andExpect(content().contentType(MediaType.TEXT_HTML));
     }
@@ -70,7 +70,7 @@ class ArticleControllerTest {
 
         //when
         mvc.perform(get("/articles/search-hashtag"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(view().name("articles/hashtag"))
                 .andExpect(content().contentType(MediaType.TEXT_HTML));
     }
