@@ -1,3 +1,5 @@
+server:
+  port: 8090
 debug: false
 management.endpoints.web.exposure.include: "*"
 
@@ -15,6 +17,7 @@ spring:
     password: 1
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
+    open-in-view: false
     defer-datasource-initialization: true
     hibernate.ddl-auto : create
     show-sql: true
