@@ -25,7 +25,7 @@ public class Article extends AuditingFields {
     private Long id;
 
     @Setter
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_account_id")
     @ManyToOne(optional = false)
     private UserAccount userAccount; // 유저 정보 (ID)
 
@@ -40,11 +40,6 @@ public class Article extends AuditingFields {
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
 
     public Article() {}
-
-    public void setUserAccount(UserAccount userAccount) {
-        this.userAccount = userAccount;
-    }
-
 
     private Article(UserAccount userAccount, String title, String content, String hashtag) {
         this.userAccount = userAccount;

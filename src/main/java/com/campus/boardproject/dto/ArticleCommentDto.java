@@ -34,8 +34,8 @@ public record ArticleCommentDto(
 
     public ArticleComment toEntity(Article entity) {
         return ArticleComment.of(
-                entity,
                 userAccountDto.toEntity(),
+                entity,
                 content
         );
     }
