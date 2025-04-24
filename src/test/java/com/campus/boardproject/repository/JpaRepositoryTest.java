@@ -48,7 +48,7 @@ class JpaRepositoryTest {
         long cntBofore = articleRepository.count();
 
         //when
-        Article savedArticle = articleRepository.save(Article.of("new articel", "new content", "#spring"));
+        Article savedArticle = articleRepository.save(Article.of(null,"new articel", "new content", "#spring"));
 
         //then
         assertThat(articleRepository.count()).isEqualTo(cntBofore+1);
