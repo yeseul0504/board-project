@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.LinkedHashSet;
 
 
+//댓글 리스트 포함
 public record ArticleWithCommentsDto(
         Long id,
         UserAccountDto userAccountDto,
