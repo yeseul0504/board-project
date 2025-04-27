@@ -2,6 +2,7 @@ package com.campus.boardproject.repository;
 
 import com.campus.boardproject.config.JpaConfig;
 import com.campus.boardproject.domain.Article;
+import com.campus.boardproject.domain.UserAccount;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,14 @@ import static org.assertj.core.api.Assertions.*;
 class JpaRepositoryTest {
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    private final UserAccountRepository userAccountRepository;
 
     public JpaRepositoryTest(@Autowired ArticleRepository articleRepository,
-                             @Autowired ArticleCommentRepository articleCommentRepository) {
+                             @Autowired ArticleCommentRepository articleCommentRepository,
+                             @Autowired UserAccountRepository userAccountRepository) {
         this.articleRepository = articleRepository;
         this.articleCommentRepository = articleCommentRepository;
+        this.userAccountRepository = userAccountRepository;
     }
 
     @DisplayName("select 테스트")
@@ -43,16 +47,17 @@ class JpaRepositoryTest {
 
     @DisplayName("insert 테스트")
     @Test
-    void givenTestData_whenInserting_thenWorksFine(){
-        //given
-        long cntBofore = articleRepository.count();
+    void givenTestData_whenInserting_thenWorksFine() {
+        // Given
+        long previousCount = articleRepository.count();
+        UserAccount userAccount = userAccountRepository.save(UserAccount.of("newUno", "pw", null, null, null));
+        Article article = Article.of(userAccount, "new article", "new content", "#spring");
 
-        //when
-        Article savedArticle = articleRepository.save(Article.of(null,"new articel", "new content", "#spring"));
+        // When
+        articleRepository.save(article);
 
-        //then
-        assertThat(articleRepository.count()).isEqualTo(cntBofore+1);
-
+        // Then
+        assertThat(articleRepository.count()).isEqualTo(previousCount + 1);
     }
 
     @DisplayName("update 테스트")
