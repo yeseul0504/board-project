@@ -2,6 +2,7 @@ package com.campus.boardproject.repository;
 
 import com.campus.boardproject.domain.Article;
 import com.campus.boardproject.domain.QArticle;
+import com.campus.boardproject.repository.querydsl.ArticleRepositoryCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.querydsl.core.types.dsl.DateTimeExpression;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @RepositoryRestResource
 public interface ArticleRepository extends
         JpaRepository<Article, Long>,
+        ArticleRepositoryCustom,
         QuerydslPredicateExecutor<Article>,
         QuerydslBinderCustomizer<QArticle> {
 
