@@ -7,6 +7,7 @@ import com.campus.boardproject.dto.ArticleDto;
 import com.campus.boardproject.dto.ArticleWithCommentsDto;
 import com.campus.boardproject.repository.ArticleRepository;
 import com.campus.boardproject.repository.UserAccountRepository;
+import com.jayway.jsonpath.JsonPath;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,24 +29,17 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public Page<ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
-        if(searchKeyword ==null || searchKeyword.isBlank()){
+        if (searchKeyword == null || searchKeyword.isBlank()) {
             return articleRepository.findAll(pageable).map(ArticleDto::from);
         }
 
-        return switch (searchType){
+        return switch (searchType) {
             case TITLE -> articleRepository.findByTitleContaining(searchKeyword, pageable).map(ArticleDto::from);
             case CONTENT -> articleRepository.findByContentContaining(searchKeyword, pageable).map(ArticleDto::from);
             case ID -> articleRepository.findByUserAccount_UserIdContaining(searchKeyword, pageable).map(ArticleDto::from);
             case NICKNAME -> articleRepository.findByUserAccount_NicknameContaining(searchKeyword, pageable).map(ArticleDto::from);
-            case HASHTAG -> articleRepository.findByHashtag("#"+searchKeyword, pageable).map(ArticleDto::from);
+            case HASHTAG -> articleRepository.findByHashtag("#" + searchKeyword, pageable).map(ArticleDto::from);
         };
-    }
-
-    @Transactional(readOnly = true)
-    public ArticleWithCommentsDto getArticleComments(Long articleId) {
-       return articleRepository.findById(articleId)
-               .map(ArticleWithCommentsDto::from)
-               .orElseThrow(()-> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
     }
 
     @Transactional(readOnly = true)
@@ -68,29 +62,30 @@ public class ArticleService {
     }
 
     public void updateArticle(Long articleId, ArticleDto dto) {
-         try{
-             Article article = articleRepository.getReferenceById(articleId);
-
-             if(dto.title() != null ){ article.setTitle(dto.title());};
-             if(dto.content() != null ){ article.setContent(dto.content());};
-
-             article.setHashtag(dto.hashtag());
-             //클래스레벨에 트랜잭션이 걸려있기 때문에 영속성 컨텍스트가 변경을 감지해서
-             //쿼리를 날리기 때문에 save 명시할 필요가 없다. 명시하고 싶다면 가능
-         }catch (EntityNotFoundException e){
-                log.warn("게시글 업데이트 실패. 게시글을 찾을 수 없습니다. - dto: {}", dto);
-         }
+        try {
+            Article article = articleRepository.getReferenceById(articleId);
+            if (dto.title() != null) { article.setTitle(dto.title()); }
+            if (dto.content() != null) { article.setContent(dto.content()); }
+            article.setHashtag(dto.hashtag());
+        } catch (EntityNotFoundException e) {
+            log.warn("게시글 업데이트 실패. 게시글을 찾을 수 없습니다 - dto: {}", dto);
+        }
     }
 
     public void deleteArticle(long articleId) {
         articleRepository.deleteById(articleId);
     }
 
+    public long getArticleCount() {
+        return articleRepository.count();
+    }
+
     @Transactional(readOnly = true)
-    public Page<ArticleDto> searchingArticlesViaHashtag(String hashtag, Pageable pageable) {
-        if (hashtag == null || hashtag.isBlank()){
+    public Page<ArticleDto> searchArticlesViaHashtag(String hashtag, Pageable pageable) {
+        if (hashtag == null || hashtag.isBlank()) {
             return Page.empty(pageable);
         }
+
         return articleRepository.findByHashtag(hashtag, pageable).map(ArticleDto::from);
     }
 
@@ -98,7 +93,5 @@ public class ArticleService {
         return articleRepository.findAllDistinctHashtags();
     }
 
-    public long getArticleCount() {
-        return articleRepository.count();
-    }
+
 }

@@ -1,9 +1,9 @@
-package com.campus.boardproject.service;
+package com.campus.boardproject.controller;
 
 import com.campus.boardproject.config.SecurityConfig;
-import com.campus.boardproject.controller.ArticleCommentController;
 import com.campus.boardproject.dto.ArticleCommentDto;
 import com.campus.boardproject.dto.request.ArticleCommentRequest;
+import com.campus.boardproject.service.ArticleCommentService;
 import com.campus.boardproject.util.FormDataEncoder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 @DisplayName("View 컨트롤러 - 댓글")
 @Import({SecurityConfig.class, FormDataEncoder.class})
 @WebMvcTest(ArticleCommentController.class)
@@ -32,8 +31,7 @@ class ArticleCommentControllerTest {
     private final MockMvc mvc;
     private final FormDataEncoder formDataEncoder;
 
-    @MockitoBean
-    private ArticleCommentService articleCommentService;
+    @MockitoBean private ArticleCommentService articleCommentService;
 
 
     public ArticleCommentControllerTest(

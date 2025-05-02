@@ -1,6 +1,7 @@
 package com.campus.boardproject.dto.response;
 
 import com.campus.boardproject.dto.ArticleWithCommentsDto;
+import com.campus.boardproject.response.ArticleCommentResponse;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

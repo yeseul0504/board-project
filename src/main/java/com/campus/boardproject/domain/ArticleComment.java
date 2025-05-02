@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @ToString(callSuper = true)
@@ -24,18 +26,28 @@ public class ArticleComment extends AuditingFields{
     @Setter @ManyToOne(optional = false) private Article article;
     @Setter @ManyToOne(optional = false) private UserAccount userAccount;
 
+    @Setter
+    @Column(updatable = false)
+    private Long parentCommentId; // 부모 댓글 ID
+
+    @ToString.Exclude
+    @OrderBy("createdAt ASC")
+    @OneToMany(mappedBy = "parentCommentId", cascade = CascadeType.ALL)
+    private Set<ArticleComment> childComments = new LinkedHashSet<>();
+
     @Setter @Column(nullable = false, length = 500) private String content;
 
     protected ArticleComment(){}
 
-    private ArticleComment(UserAccount userAccount, Article article, String content) {
-        this.userAccount= userAccount;
+    private ArticleComment(Article article, UserAccount userAccount, Long parentCommentId, String content) {
         this.article = article;
+        this.userAccount = userAccount;
+        this.parentCommentId = parentCommentId;
         this.content = content;
     }
 
-    public static ArticleComment of(UserAccount userAccount, Article article, String content){
-        return new ArticleComment(userAccount, article, content);
+    public static ArticleComment of(Article article, UserAccount userAccount, String content) {
+        return new ArticleComment(article, userAccount, null, content);
     }
 
 
