@@ -5,12 +5,14 @@ import lombok.Setter;
 import lombok.ToString;
 
 import jakarta.persistence.*;
+
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @Table(indexes = {
         @Index(columnList = "title"),
         @Index(columnList = "hashtag"),
@@ -24,10 +26,7 @@ public class Article extends AuditingFields {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
-    @JoinColumn(name = "user_account_id")
-    @ManyToOne(optional = false)
-    private UserAccount userAccount; // 유저 정보 (ID)
+    @Setter @ManyToOne(optional = false) private UserAccount userAccount; // 유저 정보 (ID)
 
     @Setter @Column(nullable = false) private String title; // 제목
     @Setter @Column(nullable = false, length = 10000) private String content; // 본문
@@ -35,11 +34,12 @@ public class Article extends AuditingFields {
     @Setter private String hashtag; // 해시태그
 
     @ToString.Exclude
-    @OrderBy("id")
+    @OrderBy("createdAt DESC")
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
 
-    public Article() {}
+
+    protected Article() {}
 
     private Article(UserAccount userAccount, String title, String content, String hashtag) {
         this.userAccount = userAccount;
@@ -51,6 +51,7 @@ public class Article extends AuditingFields {
     public static Article of(UserAccount userAccount, String title, String content, String hashtag) {
         return new Article(userAccount, title, content, hashtag);
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
