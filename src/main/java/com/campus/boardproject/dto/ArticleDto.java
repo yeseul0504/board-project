@@ -44,8 +44,7 @@ public record ArticleDto(
         return Article.of(
                 userAccount,
                 title,
-                content,
-                hashtag
+                content
         );
     }
 }
