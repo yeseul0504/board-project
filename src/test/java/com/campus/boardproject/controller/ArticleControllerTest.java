@@ -5,6 +5,7 @@ import com.campus.boardproject.domain.constant.FormStatus;
 import com.campus.boardproject.domain.constant.SearchType;
 import com.campus.boardproject.dto.ArticleDto;
 import com.campus.boardproject.dto.ArticleWithCommentsDto;
+import com.campus.boardproject.dto.HashtagDto;
 import com.campus.boardproject.dto.UserAccountDto;
 import com.campus.boardproject.dto.request.ArticleRequest;
 import com.campus.boardproject.dto.response.ArticleResponse;
@@ -14,10 +15,8 @@ import com.campus.boardproject.util.FormDataEncoder;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -48,11 +47,11 @@ class ArticleControllerTest {
     private final MockMvc mvc;
     private final FormDataEncoder formDataEncoder;
 
-    @MockitoBean
-    private ArticleService articleService;
+    @MockitoBean private ArticleService articleService;
     @MockitoBean private PaginationService paginationService;
 
-    public ArticleControllerTest(
+
+    ArticleControllerTest(
             @Autowired MockMvc mvc,
             @Autowired FormDataEncoder formDataEncoder
     ) {
@@ -63,7 +62,7 @@ class ArticleControllerTest {
 
     @DisplayName("[view][GET] 게시글 리스트 (게시판) 페이지 - 정상 호출")
     @Test
-    public void givenNothing_whenRequestingArticlesView_thenReturnsArticlesView() throws Exception {
+    void givenNothing_whenRequestingArticlesView_thenReturnsArticlesView() throws Exception {
         // Given
         given(articleService.searchArticles(eq(null), eq(null), any(Pageable.class))).willReturn(Page.empty());
         given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(0, 1, 2, 3, 4));
@@ -75,14 +74,15 @@ class ArticleControllerTest {
                 .andExpect(view().name("articles/index"))
                 .andExpect(model().attributeExists("articles"))
                 .andExpect(model().attributeExists("paginationBarNumbers"))
-                .andExpect(model().attributeExists("searchTypes"));
+                .andExpect(model().attributeExists("searchTypes"))
+                .andExpect(model().attribute("searchTypeHashtag", SearchType.HASHTAG));
         then(articleService).should().searchArticles(eq(null), eq(null), any(Pageable.class));
         then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());
     }
 
     @DisplayName("[view][GET] 게시글 리스트 (게시판) 페이지 - 검색어와 함께 호출")
     @Test
-    public void givenSearchKeyword_whenSearchingArticlesView_thenReturnsArticlesView() throws Exception {
+    void givenSearchKeyword_whenSearchingArticlesView_thenReturnsArticlesView() throws Exception {
         // Given
         SearchType searchType = SearchType.TITLE;
         String searchValue = "title";
@@ -150,7 +150,7 @@ class ArticleControllerTest {
     @WithMockUser
     @DisplayName("[view][GET] 게시글 페이지 - 정상 호출, 인증된 사용자")
     @Test
-    public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
+    void givenAuthorizedUser_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
         // Given
         Long articleId = 1L;
         long totalCount = 1L;
@@ -164,8 +164,8 @@ class ArticleControllerTest {
                 .andExpect(view().name("articles/detail"))
                 .andExpect(model().attributeExists("article"))
                 .andExpect(model().attributeExists("articleComments"))
-                .andExpect(model().attributeExists("articleComments"))
-                .andExpect(model().attribute("totalCount", totalCount));
+                .andExpect(model().attribute("totalCount", totalCount))
+                .andExpect(model().attribute("searchTypeHashtag", SearchType.HASHTAG));
         then(articleService).should().getArticleWithComments(articleId);
         then(articleService).should().getArticleCount();
     }
@@ -173,7 +173,7 @@ class ArticleControllerTest {
     @Disabled("구현 중")
     @DisplayName("[view][GET] 게시글 검색 전용 페이지 - 정상 호출")
     @Test
-    public void givenNothing_whenRequestingArticleSearchView_thenReturnsArticleSearchView() throws Exception {
+    void givenNothing_whenRequestingArticleSearchView_thenReturnsArticleSearchView() throws Exception {
         // Given
 
         // When & Then
@@ -185,7 +185,7 @@ class ArticleControllerTest {
 
     @DisplayName("[view][GET] 게시글 해시태그 검색 페이지 - 정상 호출")
     @Test
-    public void givenNothing_whenRequestingArticleSearchHashtagView_thenReturnsArticleSearchHashtagView() throws Exception {
+    void givenNothing_whenRequestingArticleSearchHashtagView_thenReturnsArticleSearchHashtagView() throws Exception {
         // Given
         List<String> hashtags = List.of("#java", "#spring", "#boot");
         given(articleService.searchArticlesViaHashtag(eq(null), any(Pageable.class))).willReturn(Page.empty());
@@ -208,7 +208,7 @@ class ArticleControllerTest {
 
     @DisplayName("[view][GET] 게시글 해시태그 검색 페이지 - 정상 호출, 해시태그 입력")
     @Test
-    public void givenHashtag_whenRequestingArticleSearchHashtagView_thenReturnsArticleSearchHashtagView() throws Exception {
+    void givenHashtag_whenRequestingArticleSearchHashtagView_thenReturnsArticleSearchHashtagView() throws Exception {
         // Given
         String hashtag = "#java";
         List<String> hashtags = List.of("#java", "#spring", "#boot");
@@ -252,7 +252,7 @@ class ArticleControllerTest {
     @Test
     void givenNewArticleInfo_whenRequesting_thenSavesNewArticle() throws Exception {
         // Given
-        ArticleRequest articleRequest = ArticleRequest.of("new title", "new content", "#new");
+        ArticleRequest articleRequest = ArticleRequest.of("new title", "new content");
         willDoNothing().given(articleService).saveArticle(any(ArticleDto.class));
 
         // When & Then
@@ -284,7 +284,7 @@ class ArticleControllerTest {
     @WithMockUser
     @DisplayName("[view][GET] 게시글 수정 페이지 - 정상 호출, 인증된 사용자")
     @Test
-    void givenNothing_whenRequesting_thenReturnsUpdatedArticlePage() throws Exception {
+    void givenAuthorizedUser_whenRequesting_thenReturnsUpdatedArticlePage() throws Exception {
         // Given
         long articleId = 1L;
         ArticleDto dto = createArticleDto();
@@ -306,7 +306,7 @@ class ArticleControllerTest {
     void givenUpdatedArticleInfo_whenRequesting_thenUpdatesNewArticle() throws Exception {
         // Given
         long articleId = 1L;
-        ArticleRequest articleRequest = ArticleRequest.of("new title", "new content", "#new");
+        ArticleRequest articleRequest = ArticleRequest.of("new title", "new content");
         willDoNothing().given(articleService).updateArticle(eq(articleId), any(ArticleDto.class));
 
         // When & Then
@@ -349,7 +349,7 @@ class ArticleControllerTest {
                 createUserAccountDto(),
                 "title",
                 "content",
-                "#java"
+                Set.of(HashtagDto.of("java"))
         );
     }
 
@@ -360,7 +360,7 @@ class ArticleControllerTest {
                 Set.of(),
                 "title",
                 "content",
-                "#java",
+                Set.of(HashtagDto.of("java")),
                 LocalDateTime.now(),
                 "uno",
                 LocalDateTime.now(),
