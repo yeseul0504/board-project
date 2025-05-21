@@ -15,7 +15,6 @@ import java.util.Set;
 @ToString(callSuper = true)
 @Table(indexes = {
         @Index(columnList = "title"),
-        @Index(columnList = "hashtag"),
         @Index(columnList = "createdAt"),
         @Index(columnList = "createdBy")
 })
@@ -26,18 +25,13 @@ public class Article extends AuditingFields {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter @ManyToOne(optional = false) private UserAccount userAccount; // 유저 정보 (ID)
+    @Setter
+    @JoinColumn(name = "userId")
+    @ManyToOne(optional = false)
+    private UserAccount userAccount; // 유저 정보 (ID)
 
     @Setter @Column(nullable = false) private String title; // 제목
     @Setter @Column(nullable = false, length = 10000) private String content; // 본문
-
-    @Setter private String hashtag; // 해시태그
-
-
-    @ToString.Exclude
-    @OrderBy("createdAt DESC")
-    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
-    private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
 
     @ToString.Exclude
     @JoinTable(
@@ -47,6 +41,13 @@ public class Article extends AuditingFields {
     )
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Hashtag> hashtags = new LinkedHashSet<>();
+
+
+    @ToString.Exclude
+    @OrderBy("createdAt DESC")
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
+    private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
+
 
     protected Article() {}
 
@@ -83,6 +84,5 @@ public class Article extends AuditingFields {
     public int hashCode() {
         return Objects.hash(this.getId());
     }
-
 
 }
